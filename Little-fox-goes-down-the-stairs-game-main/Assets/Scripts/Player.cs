@@ -148,7 +148,7 @@ public class Player : MonoBehaviour
         {
             score++;
             scoreTime = 0f ; // 重置計時器
-            scoreText.text = "地下" + score.ToString() + "層" ; // 顯示層數
+            scoreText.text = "地下 " + score.ToString() + " 層" ; // 顯示層數
         }
     }
 
