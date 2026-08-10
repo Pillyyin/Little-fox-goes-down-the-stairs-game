@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Floor : MonoBehaviour
 {
-    [SerializeField] float moveSpeed = 2f ;
 
     void Start()
     {
@@ -13,11 +12,15 @@ public class Floor : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(0, moveSpeed*Time.deltaTime,0); // 平台向上移動（模擬下樓）
-        if(transform.position.y >6f) // 當平台移出畫面上方時，刪除並生成新平台
+
+        // 讀取動態全局速度（時間越久速度越快）
+        transform.Translate(0, FloorManager.GlobalSpeed * Time.deltaTime, 0);
+
+        // 移出畫面上方時直接摧毀（生成已改由 FloorManager 統一計時控制）
+        if (transform.position.y > 6f)
         {
             Destroy(gameObject);
-            transform.parent.GetComponent<FloorManager>().SpawnFloor() ;
         }
+
     }
 }

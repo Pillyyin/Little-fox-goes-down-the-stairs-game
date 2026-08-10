@@ -11,6 +11,8 @@ public class SettingPanel : MonoBehaviour
     [Header("Audio Mixer 設定")]
     public AudioMixer mainMixer ;
 
+    [Header("關閉的其他面板")]
+    public GameObject learningPanel ; 
     // 設定面板ㄉ開關
     public void ToggleSettingPanel()
     {
@@ -19,7 +21,15 @@ public class SettingPanel : MonoBehaviour
         {
             //用activeSelf 取得當前顯示狀態
             bool isCurrentlyActive = settingPanel.activeSelf ;
+            bool nextState = !isCurrentlyActive ;
+
             settingPanel.SetActive(!isCurrentlyActive) ;
+
+            // 按設定關教學
+            if (nextState && learningPanel != null)
+            {
+                learningPanel.SetActive(false) ;
+            }
         }
     }
 
