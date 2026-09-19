@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "2024.12.17.sln"
+    "dotnet.defaultSolution": "LittleFoxGame.sln"
 }

@@ -5,6 +5,7 @@ using Unity.VisualScripting ;
 using UnityEngine ;
 using UnityEngine.UI ;
 using UnityEngine.SceneManagement ;
+using TMPro ; // 處理Web中score顯示問題
 
 public class Player : MonoBehaviour
 {
@@ -13,15 +14,15 @@ public class Player : MonoBehaviour
 
     [SerializeField] int Hp ;
     [SerializeField] GameObject HpBar ;
-    [SerializeField]Text scoreText ;
+    [SerializeField] TMP_Text scoreText;
     int score ;
     float scoreTime ;
+
     Animator anim ;
     SpriteRenderer render ;
     AudioSource deathsound ;
     [SerializeField] GameObject restartButton ;
     [SerializeField] GameObject mainMenuButton ;
-    AudioSource  Backgroundmusic ;
 
     [Header("音效設定")]
     public AudioClip normalPlatformSound ; // 普通平台音效
@@ -37,9 +38,6 @@ public class Player : MonoBehaviour
         render = GetComponent<SpriteRenderer>() ; 
         deathsound = GetComponent<AudioSource>() ; 
 
-        GameObject musicObject = GameObject.Find("Background") ;
-        Backgroundmusic = musicObject.GetComponent<AudioSource>() ;
-        Backgroundmusic.Play() ;
     }
 
     void Update()
@@ -148,25 +146,17 @@ public class Player : MonoBehaviour
         {
             score++;
             scoreTime = 0f ; // 重置計時器
-            scoreText.text = "地下 " + score.ToString() + " 層" ; // 顯示層數
+            scoreText.text = " Floor: " + score.ToString() ; // 顯示層數
         }
     }
 
     void Die()
     {
-        /*
-        deathsound.Play() ; // 播放死亡音效
-        Time.timeScale = 0f ; // 時間縮放設為 0，遊戲暫停
-        GameObject.Find("Background");
-        Backgroundmusic.Pause();
-        restartButton.SetActive(true) ; //重生按鈕出現
-        mainMenuButton.SetActive(true) ; //回主畫面按鈕出現
-        */
         if (deathsound != null) deathsound.Play(); // 播放死亡音效
 
         if (deathsound != null) deathsound.Play(); // 播放死亡音效
 
-        // 🟢 呼叫 AudioManager 專用的 PauseBGM 方法
+        // 呼叫 AudioManager 專用的 PauseBGM 方法
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PauseBGM();
