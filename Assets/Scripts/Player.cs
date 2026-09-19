@@ -5,7 +5,8 @@ using Unity.VisualScripting ;
 using UnityEngine ;
 using UnityEngine.UI ;
 using UnityEngine.SceneManagement ;
-using TMPro ; // 處理Web中score顯示問題
+using System;
+using Unity.Burst.Intrinsics;
 
 public class Player : MonoBehaviour
 {
@@ -14,10 +15,12 @@ public class Player : MonoBehaviour
 
     [SerializeField] int Hp ;
     [SerializeField] GameObject HpBar ;
-    [SerializeField] TMP_Text scoreText;
-    int score ;
-    float scoreTime ;
+    [SerializeField] TMP_Text scoreText ;
+    [SerializeField] TMP_Text bestScoreText ; // 最高層UI
 
+    public int score ;
+    public float scoreTime ;
+    public int bestscore = 0 ;  //  歷史最高層
     Animator anim ;
     SpriteRenderer render ;
     AudioSource deathsound ;
@@ -28,7 +31,7 @@ public class Player : MonoBehaviour
     public AudioClip normalPlatformSound ; // 普通平台音效
     public AudioClip trapPlatformSound ;   // 陷阱平台音效
     public AudioClip topTrapSound ;        // 天花板陷阱音效
-
+    
     void Start()
     {
         Hp = 10 ;
@@ -37,6 +40,15 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>() ; 
         render = GetComponent<SpriteRenderer>() ; 
         deathsound = GetComponent<AudioSource>() ; 
+
+        bestscore = PlayerPrefs.GetInt("BestScore", 0); //  設定最高(未存在為0)
+        
+        //  優化Floor顯示
+        if (scoreText != null)
+        {
+            scoreText.text = "Floor: " + score.ToString("D3");
+        }
+        UpdateBestScoreUI();
 
     }
 
@@ -111,11 +123,11 @@ public class Player : MonoBehaviour
     void ModifyHp(int num) // 修改血量
     {
         Hp += num ;
-        if(Hp>10)
+        if(Hp > 10)
         {
             Hp = 10 ;
         }
-        else if(Hp<=0)
+        else if(Hp <= 0)
         {
             Hp = 0 ;
             Die() ; 
@@ -127,7 +139,7 @@ public class Player : MonoBehaviour
     {
         for(int i=0; i<HpBar.transform.childCount; i++)
         {
-            if(Hp>i)
+            if(Hp > i)
             {
                 HpBar.transform.GetChild(i).gameObject.SetActive(true);
             }
@@ -142,30 +154,48 @@ public class Player : MonoBehaviour
     void UpdateScore() // 更新分數（層數）
     {
         scoreTime += Time.deltaTime; // 每次 Update 累加時間
-        if(scoreTime>2f)  // scoreTime 累積超過 2 秒
+        if(scoreTime > 2f)  // scoreTime 累積超過 2 秒
         {
             score++;
             scoreTime = 0f ; // 重置計時器
-            scoreText.text = " Floor: " + score.ToString() ; // 顯示層數
+            scoreText.text = "Floor: " + score.ToString("D3") ;
+
+        }
+    }
+
+    void UpdateBestScoreUI()
+    {
+        if(bestScoreText != null)
+        {
+            bestScoreText.text = "Best: " + bestscore.ToString("D3") ;
         }
     }
 
     void Die()
     {
-        if (deathsound != null) deathsound.Play(); // 播放死亡音效
-
-        if (deathsound != null) deathsound.Play(); // 播放死亡音效
+        if (deathsound != null) deathsound.Play() ; // 播放死亡音效
 
         // 呼叫 AudioManager 專用的 PauseBGM 方法
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PauseBGM();
+            AudioManager.Instance.PauseBGM() ;
         }
 
-        Time.timeScale = 0f; // 時間縮放設為 0，遊戲暫停
+        Time.timeScale = 0f ; // 時間縮放設為 0，遊戲暫停
 
-        if (restartButton != null) restartButton.SetActive(true); // 重生按鈕出現
-        if (mainMenuButton != null) mainMenuButton.SetActive(true); // 回主畫面按鈕出現
+        if (restartButton != null) restartButton.SetActive(true) ; // 重生按鈕出現
+        if (mainMenuButton != null) mainMenuButton.SetActive(true) ; // 回主畫面按鈕出現
+
+        // 死亡後是否破紀錄
+        if(score > bestscore)
+        {
+            bestscore = score ;
+
+            PlayerPrefs.SetInt("BestScore", bestscore) ;
+            PlayerPrefs.Save() ;
+
+            UpdateBestScoreUI() ;
+        }
     }
 
 
